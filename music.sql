@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS Album (
 	year_of INTEGER NOT NULL
 );
 
+
 CREATE TABLE IF NOT EXISTS AlbumMusician (
 	Album_id INTEGER REFERENCES Album(id),
 	Musician_id INTEGER REFERENCES Musician(id),
@@ -143,40 +144,29 @@ OR LOWER(name) LIKE 'my %' OR LOWER(name) LIKE '% my' OR LOWER(name) LIKE '% my 
 
 --select_2
 
-SELECT albumname, COUNT(genrename) FROM album al
-JOIN artistalbum aa ON al.albumid = aa.albumid
-JOIN artist ar ON aa.artistid = ar.artistid
-JOIN genreartist ga ON ar.artistid = ga.artistid
-JOIN genre g ON ga.genreid = g.genreid
-GROUP BY albumname
-HAVING COUNT(genrename) > 1
+SELECT name, COUNT(name) FROM Genre g
+JOIN GenreMusician gm ON g.Genre_id = gm.Genre_id
+JOIN Musician m ON gm.Musician_id = m.Musician_id
+GROUP BY name;
 
-SELECT name, COUNT (name) FROM Musician e
-JOIN GenreMusician ge  ON e.Musician_id = ge.Musician_id 
-JOIN Genre g ON ge.Genre_id = g.Genre_id 
-GROUP BY g.Genre_id;
+SELECT name, COUNT(name) FROM Album a
+JOIN Songs s ON a.Album_id = s.Album_id
+WHERE year_of BETWEEN 2019 AND 2020
+GROUP BY name;
 
-SELECT COUNT(name) FROM Songs t 
-JOIN Album a ON a.Album_id = t.Album_id 
-WHERE a.year_of BETWEEN 2019 AND 2020;
+SELECT name, AVG(duration) FROM Album a
+JOIN Songs s ON a.Album_id = s.Album_id
+GROUP BY name;
 
-SELECT name, AVG(duration) FROM Songs t 
-JOIN Album a ON a.Album_id = t.Album_id 
-gROUP BY a.name;
+SELECT name, year_of FROM Musician m
+JOIN AlbumMusician Album a ON m.Musician_id = am.Musician_id
+JOIN Album a ON am.Album_id = a.Album_id
+WHERE year_of != 2020
 
-SELECT name FROM Musician e 
-WHERE name NOT IN (
-SELECT name FROM Album a 
-JOIN AlbumMusician ea ON a.Album_id = ea.Album_id 
-JOIN Musician e ON ea.Musician_id = e.Musician_id
-WHERE a.year_of = 2020);
-
-SELECT name FROM Collection c 
-JOIN SongsCollection ct ON c.Collection_id = ct.collection_id   
-JOIN Songs t ON ct.Songs_id = t.Songs_id 
-JOIN Album a ON t.Album_id = a.Album_id 
-JOIN AlbumMusician ea ON a.Album_id = ea.Album_id 
-JOIN Musician e ON ea.Musician_id = e.Musician_id 
-WHERE e.name LIKE 'Ramstein';
-
-
+SELECT name FROM Collection c
+JOIN SongsCollection sc ON c.Collection_id = sc.Collection_id
+JOIN Songs s ON sc.Songs_id = s.Songs_id
+JOIN Album a ON s.Album_id = a.Album_id
+JOIN AlbumMusician am ON a.Album_id = am.Album_id
+JOIN Musician m ON am.Musician_id = m.Musician_id
+WHERE m.name = 'Ramstein'
