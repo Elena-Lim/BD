@@ -143,30 +143,29 @@ OR LOWER(name) LIKE 'my %' OR LOWER(name) LIKE '% my' OR LOWER(name) LIKE '% my 
 
 
 --select_2
-
 SELECT name, COUNT(name) FROM Genre g
-JOIN GenreMusician gm ON g.Genre_id = gm.Genre_id
-JOIN Musician m ON gm.Musician_id = m.Musician_id
+JOIN GenreMusician gm ON g.id = gm.Genre_id
+JOIN Musician m ON gm.Musician_id = m.id
 GROUP BY name;
 
 SELECT name, COUNT(name) FROM Album a
-JOIN Songs s ON a.Album_id = s.Album_id
+JOIN Songs s ON a.id = s.Album_id
 WHERE year_of BETWEEN 2019 AND 2020
 GROUP BY name;
 
 SELECT name, AVG(duration) FROM Album a
-JOIN Songs s ON a.Album_id = s.Album_id
+JOIN Songs s ON a.id = s.Album_id
 GROUP BY name;
 
 SELECT name, year_of FROM Musician m
-JOIN AlbumMusician Album a ON m.Musician_id = am.Musician_id
-JOIN Album a ON am.Album_id = a.Album_id
+JOIN AlbumMusician Album a ON m.id = am.Musician_id
+JOIN Album a ON am.Album_id = a.id
 WHERE year_of != 2020
 
 SELECT name FROM Collection c
-JOIN SongsCollection sc ON c.Collection_id = sc.Collection_id
-JOIN Songs s ON sc.Songs_id = s.Songs_id
-JOIN Album a ON s.Album_id = a.Album_id
-JOIN AlbumMusician am ON a.Album_id = am.Album_id
-JOIN Musician m ON am.Musician_id = m.Musician_id
+JOIN SongsCollection sc ON c.id = sc.Collection_id
+JOIN Songs s ON sc.Songs_id = s.id
+JOIN Album a ON s.Album_id = a.id
+JOIN AlbumMusician am ON a.id = am.Album_id
+JOIN Musician m ON am.Musician_id = m.id
 WHERE m.name = 'Ramstein'
