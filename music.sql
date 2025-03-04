@@ -1,62 +1,63 @@
-CREATE TABLE IF NOT EXISTS Genre (
-	id SERIAL PRIMARY KEY,
-	name VARCHAR(30) NOT NULL
+CREATE TABLE IF NOT EXISTS genres (
+	genre_id serial PRIMARY KEY,
+	genre_name varchar(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS Musician (
-	id SERIAL PRIMARY KEY,
-	name VARCHAR(40) NOT NULL
+CREATE TABLE IF NOT EXISTS musicians (
+	musician_id serial PRIMARY KEY,
+	musician_name varchar(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS GenreMusician (
-	Genre_id INTEGER REFERENCES Genre(id),
-	Musician_id INTEGER REFERENCES Musician(id),
-	CONSTRAINT pk_GenreMusician PRIMARY KEY (Genre_id, Musician_id)
+CREATE TABLE IF NOT EXISTS genres_musicians (
+	genre_musician_id serial PRIMARY KEY,
+	genre_id int REFERENCES genres(genre_id),
+	musician_id int REFERENCES musicians(musician_id)
 );
 
-CREATE TABLE IF NOT EXISTS Album (
-	id SERIAL PRIMARY KEY,
-	name VARCHAR (30) NOT NULL,
-	year_of INTEGER NOT NULL
+CREATE TABLE IF NOT EXISTS albums (
+	album_id serial PRIMARY KEY,
+	album_name varchar(50) NOT NULL,
+	album_year int NOT NULL
 );
 
-
-CREATE TABLE IF NOT EXISTS AlbumMusician (
-	Album_id INTEGER REFERENCES Album(id),
-	Musician_id INTEGER REFERENCES Musician(id),
-	CONSTRAINT pk_AlbumMusician PRIMARY KEY (Album_id, Musician_id)
+CREATE TABLE IF NOT EXISTS musicians_albums (
+	musician_album_id serial PRIMARY KEY,
+	musician_id int REFERENCES musicians(musician_id),
+	album_id int REFERENCES albums(album_id)
 );
 
-CREATE TABLE IF NOT EXISTS Songs (
-	id SERIAL PRIMARY KEY,
-	name VARCHAR(50) NOT NULL,
-	duration INTEGER,
-	Album_id INTEGER REFERENCES Album(id) 
+CREATE TABLE IF NOT EXISTS tracks (
+	track_id serial PRIMARY KEY,
+	track_name varchar(50) NOT NULL,
+	track_duration int NOT NULL,
+	album_id int REFERENCES albums(album_id)
 );
 
-CREATE TABLE IF NOT EXISTS Collection (   
-	id SERIAL PRIMARY KEY,
-	name VARCHAR(40) NOT NULL,
-	year_of INTEGER NOT NULL
+CREATE TABLE IF NOT EXISTS collections (
+	collection_id serial PRIMARY KEY,
+	collection_name varchar(50) NOT NULL,
+	collection_year int NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS SongsCollection (
-	Songs_id INTEGER REFERENCES Songs(id),
-	Collection_id INTEGER REFERENCES Collection(id),
-	CONSTRAINT pk_SongsCollection PRIMARY KEY (Songs_id, Collection_id)
+CREATE TABLE IF NOT EXISTS collections_tracks (
+	collections_tracks_id serial PRIMARY KEY,
+	collection_id int REFERENCES collections(collection_id),
+	track_id int REFERENCES tracks(track_id)
 );
+
 
 --insert
-INSERT INTO Genre
-(name)
+
+INSERT INTO genres
+(genre_name)
 VALUES
 ('Rap'), 
 ('Pop'), 
 ('Rock'), 
 ('Punk');
 
-INSERT INTO Musician
-(name)
+INSERT INTO musicians
+(musician_name)
 VALUES
 ('Ramstein'), 
 ('Linkin Park'), 
@@ -64,8 +65,8 @@ VALUES
 ('Баста'), 
 ('Zivert');
 
-INSERT INTO GenreMusician
-(Genre_id, Musician_id)
+INSERT INTO genres_musicians
+(genre_id, musician_id)
 VALUES
 (1, 5),
 (2, 4),
@@ -73,8 +74,8 @@ VALUES
 (4, 3),
 (3, 2);
 
-INSERT INTO Album
-(name, year_of)
+INSERT INTO albums
+(album_name, album_year)
 VALUES
 ('Будь как дома путник', 1997),
 ('БАСТА 1', 2006), 
@@ -82,8 +83,8 @@ VALUES
 ('Rammstein', 2019), 
 ('Meteora', 2003);
 
-INSERT INTO Songs
-(name, duration, Album_id)
+INSERT INTO tracks
+(track_name, track_duration, album_id)
 VALUES
 ('Forever Young', 180, 3), 
 ('Я устал', 228, 1), 
@@ -92,8 +93,8 @@ VALUES
 ('Вечно молодой Мой', 268, 2), 
 ('Numb', 187, 5);
 
-INSERT INTO AlbumMusician
-(Musician_id, Album_id)
+INSERT INTO musicians_albums
+(musician_id, album_id)
 VALUES
 (1, 4), 
 (2, 5), 
@@ -101,71 +102,72 @@ VALUES
 (5, 3), 
 (4, 2);
 
-INSERT INTO Collection
-(name, year_of)
+INSERT INTO collections
+(collection_name, collection_year)
 VALUES
 ('Наивные песни', 2005), 
 ('Поколение Брат', 2022), 
 ('Lost Highway', 1997), 
 ('Valentine', 2001);
 
-INSERT INTO SongsCollection
-(Collection_id, Songs_id)
+INSERT INTO collections_tracks
+(collection_id, track_id)
 VALUES
 (1, 1), 
 (2, 2), 
 (3, 4), 
 (4, 5);
 
-
 --select_1
 
-SELECT name, duration
-FROM Songs
-WHERE duration = (SELECT MAX(duration) FROM Songs);
+SELECT track_name, track_duration
+FROM tracks
+WHERE track_duration = (SELECT MAX(track_duration) FROM tracks);
 
-SELECT name, duration
-FROM Songs
-WHERE duration >= 210;
+SELECT track_name, track_duration
+FROM tracks
+WHERE track_duration >= 210;
 
-SELECT name, year_of 
-FROM Collection
-WHERE year_of BETWEEN 2018 AND 2022;
+SELECT collection_name, collection_year 
+FROM collections
+WHERE collection_year BETWEEN 2018 AND 2022;
 
-SELECT name
-FROM Musician
-WHERE name NOT LIKE '% %';
+SELECT musician_name
+FROM musicians
+WHERE musician_name NOT LIKE '% %';
 
-SELECT name
-FROM Songs
-WHERE LOWER(name) LIKE 'мой %' OR LOWER(name) LIKE '% мой' OR LOWER(name) LIKE '% мой %' OR LOWER(name) LIKE 'мой' 
-OR LOWER(name) LIKE 'my %' OR LOWER(name) LIKE '% my' OR LOWER(name) LIKE '% my %' OR LOWER(name) LIKE 'my';
+SELECT track_name
+FROM tracks
+WHERE LOWER(track_name) LIKE 'мой %' or LOWER(track_name) LIKE '% мой' OR LOWER(track_name) LIKE '% мой %' or lower(track_name) LIKE 'мой' 
+OR LOWER(track_name) LIKE 'my %' or lower(track_name) LIKE '% my' OR LOWER(track_name) LIKE '% my %' or lower(track_name) LIKE 'my';
 
 
 --select_2
-SELECT name, COUNT(name) FROM Genre g
-JOIN GenreMusician gm ON g.id = gm.Genre_id
-JOIN Musician m ON gm.Musician_id = m.id
-GROUP BY name;
 
-SELECT name, COUNT(name) FROM Album a
-JOIN Songs s ON a.id = s.Album_id
-WHERE year_of BETWEEN 2019 AND 2020
-GROUP BY name;
+SELECT genre_name, COUNT (musician_name) FROM musicians m 
+JOIN genres_musicians gm  ON m.musician_id = gm.musician_id 
+JOIN genres g ON gm.genre_id = g.genre_id 
+GROUP BY g.genre_id;
 
-SELECT name, AVG(duration) FROM Album a
-JOIN Songs s ON a.id = s.Album_id
-GROUP BY name;
+SELECT COUNT(track_name) FROM tracks t 
+JOIN albums a on a.album_id = t.album_id 
+WHERE a.album_year BETWEEN 2019 AND 2020;
 
-SELECT name, year_of FROM Musician m
-JOIN AlbumMusician Album a ON m.id = am.Musician_id
-JOIN Album a ON am.Album_id = a.id
-WHERE year_of != 2020
+SELECT album_name, AVG(track_duration) FROM tracks t 
+JOIN albums a ON a.album_id = t.album_id 
+GROUP BY a.album_name;
 
-SELECT name FROM Collection c
-JOIN SongsCollection sc ON c.id = sc.Collection_id
-JOIN Songs s ON sc.Songs_id = s.id
-JOIN Album a ON s.Album_id = a.id
-JOIN AlbumMusician am ON a.id = am.Album_id
-JOIN Musician m ON am.Musician_id = m.id
-WHERE m.name = 'Ramstein'
+SELECT musician_name FROM musicians m 
+WHERE musician_name NOT IN (
+SELECT musician_name FROM albums a 
+JOIN musicians_albums ma ON a.album_id = ma.album_id 
+JOIN musicians m ON ma.musician_id = m.musician_id
+WHERE a.album_year = 2020);
+
+select collection_name from collections c 
+join collections_tracks ct on c.collection_id = ct.collection_id 
+join tracks t on ct.track_id = t.track_id 
+join albums a on t.album_id = a.album_id 
+join musicians_albums ma on a.album_id = ma.album_id 
+join musicians m on ma.musician_id = m.musician_id 
+where m.musician_name = 'Ramstein'
